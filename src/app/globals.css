@@ -1,26 +1,53 @@
+@config "../../tailwind.config.ts";
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
+}
+
+.pattern-bg {
+  background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuALs-Hc4C8iFQlYWthwJu9UldKy5e2MHsuh7bwqYOOeYNMG4TRaHt0j1BxyVTpJqpIYbZuvcYk24L-_v1ESDGutrCooD4EsPfMBixAybGdTFl4G78nF1hMPb_HOTt-6RLQZcjgQUFW92VeIfDNU-YekftWMXdYYmuz4NEGvPEf5ao-7Aq-7VBhuxXTfpZ_Y2upxrdvTihRAAaUN6UYVbfH5reKOIxiSC9A5og9ELbX1j6fD0oInauvgjSuWIIuhba_ZYidATw4p8oNz);
+}
+
+.light-mode-pattern {
+  background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuA5SlBFNX9mkvDyemiyExp7ctMdpiJDLrd1HleEmAWAACXI9ZKGQyIss59b627tgngAy2qi72tMkC8YWJxokwkJ6xShpDRC2RxM53Ds1GJsR5OKw-yZEp9d-IjgTX9ixfgCCaahRNi-7swhvSw94teomZVO-uFNnYx0HKJ5_9SF61vvLCXPkWx5roYaJuBMMOtSChp8xvGOgElBGXloFrRPI1yOKSRPJchpts0ujDbtF1tJOE3ZfSno_VzHRwcg7z2UchbGOZXkQZ4L);
+}
+
+.auth-gradient {
+  background: linear-gradient(180deg, #0F172A 0%, #0F172A 40%, #000000 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.light-rays {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 60%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 84, 0, 0) 0%,
+    rgba(255, 84, 0, 0.1) 20%,
+    rgba(255, 84, 0, 0.6) 40%,
+    rgba(255, 84, 0, 0.6) 60%,
+    rgba(255, 84, 0, 0.1) 80%,
+    rgba(255, 84, 0, 0) 100%
+  );
+  filter: blur(40px);
+  opacity: 0.6;
+  transform-origin: bottom center;
+}
+
+.light-ray-core {
+  position: absolute;
+  bottom: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 150px;
+  height: 400px;
+  background: #FF5400;
+  filter: blur(60px);
+  opacity: 0.4;
 }
