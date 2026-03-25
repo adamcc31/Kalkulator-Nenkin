@@ -15,7 +15,7 @@ export async function updateSession(request: NextRequest) {
                     return request.cookies.getAll()
                 },
                 setAll(cookiesToSet) {
-                    cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+                    cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
                     supabaseResponse = NextResponse.next({
                         request,
                     })
@@ -31,8 +31,64 @@ export async function updateSession(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser()
 
-    const isAuthRoute = request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/auth')
-    const isOnboardingRoute = request.nextUrl.pathname.startsWith('/onboarding')
+    const pathname = request.nextUrl.pathname
+
+    // ============================================================
+    // DASHBOARD ROUTES — Separate auth flow for admin
+    // ============================================================
+    const isDashboardRoute = pathname.startsWith('/dashboard')
+    const isDashboardLogin = pathname === '/dashboard/login'
+
+    if (isDashboardRoute) {
+        if (isDashboardLogin) {
+            // If already authenticated as admin, skip login page
+            if (user) {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', user.id)
+                    .single()
+
+                if (profile?.role === 'admin') {
+                    const url = request.nextUrl.clone()
+                    url.pathname = '/dashboard'
+                    return NextResponse.redirect(url)
+                }
+            }
+            // Not logged in or not admin → show dashboard login form
+            return supabaseResponse
+        }
+
+        // All other /dashboard/* routes require authenticated admin
+        if (!user) {
+            const url = request.nextUrl.clone()
+            url.pathname = '/dashboard/login'
+            return NextResponse.redirect(url)
+        }
+
+        // User is authenticated — verify admin role
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single()
+
+        if (profile?.role !== 'admin') {
+            // Not admin → kick out to public home
+            const url = request.nextUrl.clone()
+            url.pathname = '/'
+            return NextResponse.redirect(url)
+        }
+
+        // Admin verified → allow access (skip onboarding check)
+        return supabaseResponse
+    }
+
+    // ============================================================
+    // PUBLIC ROUTES — Existing logic (unchanged)
+    // ============================================================
+    const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/auth') || pathname.startsWith('/api/admin')
+    const isOnboardingRoute = pathname.startsWith('/onboarding')
 
     if (!user && !isAuthRoute) {
         const url = request.nextUrl.clone()
@@ -49,7 +105,7 @@ export async function updateSession(request: NextRequest) {
                 url.pathname = '/onboarding'
                 return NextResponse.redirect(url)
             }
-        } else if (isAuthRoute && request.nextUrl.pathname === '/login') {
+        } else if (isAuthRoute && pathname === '/login') {
             const { data: profile } = await supabase.from('profiles').select('is_onboarded').eq('id', user.id).single()
             const url = request.nextUrl.clone()
             url.pathname = profile?.is_onboarded ? '/' : '/onboarding'
